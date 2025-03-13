@@ -20,41 +20,41 @@ const App = () => {
 
   useEffect(()=>{
     checkAuth()
-  },[checkAuth])
+  },[authUser])
 
   useEffect(() => {
-      if (!myProfile && checkAuth) {
+      if (authUser && !myProfile) {
         ProfileData();
       }
-  }, []);
+  }, [authUser]);
   
   if (isCheckingAuth && !authUser){
     return (
       <div className="flex items-center justify-center h-screen"> 
-        loading.....................
+        loading Auth.....................
       </div>
     );
   }
 
-  if(!myProfile && checkAuth) {
+  if(authUser && !myProfile ) {
     return (
       <div className="flex items-center justify-center h-screen">
-        loading...............
+        loading profile...............
       </div>
     )
-  }
-  
+  }  
+
   return (
     <div>
       <Toaster position="top-right" reverseOrder={false} />
       <Navbar />
       <Routes>
-        <Route path='/' element={ authUser ? <Home /> : <Navigate to="/auth" /> } />
+        <Route path='/' element={<Home /> } />
         <Route path='/auth' element={!authUser ? <AuthPage /> : <Navigate to="/" /> } />
         <Route path='/profile' element={ authUser ? <ProfileDashboard />: <Navigate to="/auth" /> } />
-        <Route path='/coursepage/:videoUrl' element={<CoursePage />} />
+        <Route path='/coursepage/:videoUrl' element={ authUser ? <CoursePage />: <Navigate to="/auth" /> }/>
         <Route path='/coursespage' element={<CoursesPage />} />
-        <Route path='/video' element={<UploadVideoComponent/>} />
+        <Route path='/uploadVideo' element={ myProfile?.role === "Student" ? <UploadVideoComponent />: <Navigate to="/" /> }/>
       </Routes>
     </div>
   )

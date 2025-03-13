@@ -18,15 +18,19 @@ const userSchema = mongoose.Schema({
     },
     profilePic : {
         type : String,
-        default : "",
+        default : "https://res.cloudinary.com/dygoctkdq/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1741767169/avatar_ikimgk.png",
     },
     role : {
         type : String,
         default : "Student",
     },
-    Wallet : {
+    wallet : {
         type : Number,
         default : 0,
+    },
+    about : {
+        type : String,
+        default : "Hey there! I'm using this platform to learn and grow 🚀",
     },
     coursesBuyied : [
         {
@@ -46,6 +50,14 @@ const userSchema = mongoose.Schema({
                 type : String,
                 required : true,
             },
+            description : {
+                type : String,
+                required : true,
+            },
+            price : {
+                type : Number,
+                default : 0,
+            }
         }
     ],
     yourCourse : [
@@ -66,6 +78,14 @@ const userSchema = mongoose.Schema({
                 type : String,
                 required : true,
             },
+            description : {
+                type : String,
+                required : true,
+            },
+            price : {
+                type : Number,
+                default : 0,
+            }
         }
     ]
 });

@@ -13,7 +13,7 @@ export const VideoStore = create( (set , get) => ({
     courses : [],
     yourCourses : [],
     courseBuyied : [],
-    specificVideo : [],
+    specificVideo : {},
     
     GetCourses : async() => {
         try {
@@ -27,15 +27,17 @@ export const VideoStore = create( (set , get) => ({
         }
     },
 
-    GetVideo : async(url) => {
+    GetVideo: async (url) => {
         try {
             const res = await axiosInstance.get(`/videos/getVideo/${encodeURIComponent(url)}`);
-            set({specificVideo : res.data})
-            console.log("API Response:", res.data);
+            set({ specificVideo: res.data });
         } catch (error) {
-            toast.error(error.response.data.message);
+            console.error("Error fetching video:", error?.response?.data?.message || error.message);
+            toast.error(error?.response?.data?.message || "Failed to load video.");
+            set({ specificVideo: {} });
+            console.log("API error Response:", get().specificVideo);
         } finally {
-            set({ loadingVideo : false});
+            set({ loadingVideo: false });
         }
     },
 
@@ -87,9 +89,26 @@ export const VideoStore = create( (set , get) => ({
             // set((state) => ({ courseBuyied: [...state.courseBuyied] })); 
         } catch (error) {
             console.error("Error Response:", error.response?.data || error.message);
+            if (error.response?.data?.error === "Insufficient wallet balance") {
+                toast.error("Insufficient balance! Please add more funds.");
+            } else {
+                toast.error(error.response?.data?.message || "Something went wrong!");
+            }
+        } finally {
+            set({ purchasingCourse: false });
+        }
+    },
+    
+    StripePurchaseCourse : async({price , videoUrl}) => {
+        set({ purchasingCourse: true });
+        try {
+            const response = await axiosInstance.post('/payment/checkOut', {price , videoUrl});
+            return response.data.url;
+        } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong!");
         } finally {
             set({ purchasingCourse: false });
         }
-    }    
+    }
+    
 }))

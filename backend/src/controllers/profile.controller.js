@@ -9,7 +9,7 @@ const profiledata = async(req,res) => {
     try {
         const user = await User.findOne({email});
         if(!user) return res.status(400).json({message : "No user found"});
-        res.status(200).json({profilePic : user.profilePic , fullName : user.fullName , role : user.role , email , coursesBuyied : user.coursesBuyied })
+        res.status(200).json({profilePic : user.profilePic , fullName : user.fullName , role : user.role , email , coursesBuyied : user.coursesBuyied, wallet : user.wallet, about: user.about, userId : user._id})
     } catch (error) {
         console.log("Error in generalSetting" , error);
         res.status(500).json({ message : "Internal Server Error"})
@@ -54,11 +54,12 @@ const updateProfilePic = async(req,res) => {
 }
 
 const updateProfile = async(req,res) => {
-    const { fullName } = req.body;
+    const { fullName, about } = req.body;
     try {
         const updatedUser = await User.findByIdAndUpdate(req.user.userId,
             {
-                fullName
+                fullName,
+                about,
             },
             { new: true }
         )
@@ -70,4 +71,44 @@ const updateProfile = async(req,res) => {
         res.status(500).json({ message : "Internal Server Error"})
     }
 }
-module.exports = { updateProfilePic , updateProfile , profiledata}
+
+const addBalance = async(req,res) => {
+    const { balance } = req.body;
+    try{
+        const user = await User.findByIdAndUpdate(
+            req.user.userId , {
+                $inc : { wallet : balance},
+            },{ new: true }
+        )
+        if(!user) return res.status(404).json({message : "User Not Found"})
+        
+        return res.status(200).json({ message : `Successfully added ₹${balance} to your wallet`})
+    } catch(error) {
+        console.log("Error in addBalance" , error);
+        res.status(500).json({ message : "Internal Server Error"})
+    }   
+}
+
+const withdrawBalance = async(req,res) => {
+    const { balance } = req.body;
+    try{
+        const checkUser = await User.findById(req.user.userId);
+        if(!checkUser) return res.status(404).json({message : "User Not Found"});
+
+        if(checkUser.wallet < balance ) return res.status(200).json({message : "Insufficient funds for withdrawl!"});
+
+        const user = await User.findByIdAndUpdate(
+            req.user.userId , {
+                $inc : { wallet : -balance},
+            },{ new: true }
+        )
+        if(!user) return res.status(404).json({message : "User Not Found"})
+        
+        return res.status(200).json({ message : `Successfully withdrawn a balance of ₹${balance}.`})
+    } catch(error) {
+        console.log("Error in withdrawBalance" , error);
+        res.status(500).json({ message : "Internal Server Error"})
+    }   
+}
+
+module.exports = { updateProfilePic , updateProfile , profiledata , addBalance , withdrawBalance}

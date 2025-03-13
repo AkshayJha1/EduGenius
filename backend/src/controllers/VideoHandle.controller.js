@@ -1,5 +1,5 @@
 const User = require('../models/user.model');
-const CourseVideos = require('../models/videos.model');
+const jwt = require('jsonwebtoken');
 
 const cloudinary = require('../config/cloudinary.config');
 const fs = require("fs");
@@ -10,7 +10,7 @@ const uploadVideo = async (req,res) => {
         return res.status(400).json({ error: "No video file uploaded" });
     }
 
-    const { title , subject } = req.body;
+    const { title , subject , price , description} = req.body;
     try {
 
         const upload = await cloudinary.uploader.upload(req.files.video[0].path, {
@@ -50,6 +50,8 @@ const uploadVideo = async (req,res) => {
                         thumbnailUrl: thumbnailUrl.secure_url,
                         videoTitle: title || req.file.originalname, // Using the original filename as the title
                         videoSubject : subject || req.file.originalname,
+                        description : description || "This course is designed to help you to master the concept. Whether you're a beginner or looking to enhance your skills, this course provides step-by-step guidance, practical examples, and real-world applications.",
+                        price : Number(price) || 0,
                     }
                 }
             },
@@ -58,31 +60,14 @@ const uploadVideo = async (req,res) => {
 
         if (!updatedUser) {
             return res.status(404).json({ error: "User not found" });
-        }
-
-        const updatedVideos = await CourseVideos.create({ 
-            userId: req.user.userId,
-            videos: [  
-                {
-                    videoUrl: upload.secure_url,
-                    thumbnailUrl: thumbnailUrl.secure_url,
-                    videoTitle: title || req.file.originalname,
-                    videoSubject: subject || req.file.originalname,
-                }
-            ]
-        });
-        
-
-        if (!updatedVideos) {
-            return res.status(404).json({ error: "CourseVideos not found" });
-        }
+        }        
 
         res.status(200).json({ 
             message: "Video uploaded successfully",
             videoUrl: upload.secure_url,
             thumbnailUrl: thumbnailUrl.secure_url,
             public_id: upload.public_id,
-            user: updatedUser
+            user: updatedUser.yourCourse[0]
         });
         
     } catch (error) {
@@ -105,8 +90,11 @@ const yourCourses = async(req,res) => {
 }
 
 const coursesBuyied = async(req,res) => {
-    const userId = req.user.userId;
+        const token = req.cookies.jwt;
+        if(!token) return res.status(404).json({message : "No user found"})
     try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const userId = decoded.userId;
         const coursesBuyiedVidoes = await User.findById(userId,{ coursesBuyied : 1 });
         if(!coursesBuyiedVidoes) return res.status(200).json({ "message" : "user not buyied any course"});
 
@@ -130,8 +118,8 @@ const getThumbnails = async (req, res) => {
         const allVideos = users.flatMap((user) => 
             user.yourCourse.map((course) => ({
                 thumbnailUrl: course.thumbnailUrl,
-                title: course.videoTitle,  // Ensure this is the correct field name
-                subject: course.videoSubject // Ensure this is the correct field name
+                title: course.videoTitle, 
+                subject: course.videoSubject,
             }))
         );
 
@@ -147,7 +135,7 @@ const getVideoByThumbnail = async (req, res) => {
     try {
         const { thumbnail } = req.params;
         const decodedThumbnail = decodeURIComponent(thumbnail).trim();
-
+        // Find the user who owns the course
         const user = await User.findOne(
             { yourCourse: { $elemMatch: { thumbnailUrl: { $regex: new RegExp(`^${decodedThumbnail}$`, "i") } } } },
             { "yourCourse.$": 1, _id: 0 }
@@ -157,28 +145,29 @@ const getVideoByThumbnail = async (req, res) => {
             return res.status(404).json({ message: "Video not found" });
         }
 
+        // current logged-in user
         const currUser = await User.findById(req.user.userId, { coursesBuyied: 1, _id: 0 });
 
-        const isCourseBuyied = currUser.coursesBuyied.some(video =>
+        if (!currUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const isCourseBuyied = currUser.coursesBuyied?.some(video =>
             video.thumbnailUrl === user.yourCourse[0].thumbnailUrl
         );
 
-        if (isCourseBuyied) {
-            return res.status(200).json({
-                video: user.yourCourse[0],
-                isCoursePurchased: true
-            });
-        } else {
-            return res.status(200).json({
-                video : {
-                    thumbnailUrl: user.yourCourse[0].thumbnailUrl,
-                    videoTitle: user.yourCourse[0].videoTitle,
-                    videoSubject: user.yourCourse[0].videoSubject,
-                    _id : user.yourCourse[0]._id,
-                },                
-                isCoursePurchased: false
-            });
-        }
+        return res.status(200).json({
+            video: isCourseBuyied ? user.yourCourse[0] : {
+                thumbnailUrl: user.yourCourse[0].thumbnailUrl,
+                videoTitle: user.yourCourse[0].videoTitle,
+                videoSubject: user.yourCourse[0].videoSubject,
+                description: user.yourCourse[0].description,
+                price: user.yourCourse[0].price,
+                _id: user.yourCourse[0]._id,
+            },
+            isCoursePurchased: !!isCourseBuyied,
+        });
+
     } catch (error) {
         console.error("Error in getVideoByThumbnail:", error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -186,44 +175,62 @@ const getVideoByThumbnail = async (req, res) => {
 };
 
 
+
 const buyCourse = async (req, res) => {
     try {
-        const { thumbnail } = req.params; // Get thumbnail from request body
+        const buyer = await User.findById(req.user.userId);
+        if (!buyer) return res.status(404).json({ error: "User not found in database" });
+
+        const { thumbnail } = req.params;
         const decodedThumbnail = decodeURIComponent(thumbnail);
 
-        const user = await User.findOne(
+        const seller = await User.findOne(
             { "yourCourse.thumbnailUrl": { $regex: new RegExp(`^${decodedThumbnail}$`, "i") } },
-            { "yourCourse.$": 1 } 
+            { "yourCourse.$": 1 } // Only fetch the specific course
         );
 
-        if (!user || !user.yourCourse.length) {
+        if (!seller || !seller.yourCourse.length) {
             return res.status(404).json({ message: "Course not found" });
         }
 
-        const courseToBuy = user.yourCourse[0]; 
+        const courseToBuy = seller.yourCourse[0];
 
-        const updatedUser = await User.findByIdAndUpdate(
+        // buyer already owns the course ?
+        const alreadyPurchased = buyer.coursesBuyied.some(course => course.thumbnailUrl === courseToBuy.thumbnailUrl);
+        if (alreadyPurchased) {
+            return res.status(400).json({ error: "You have already purchased this course" });
+        }
+
+        //buyer has enough money
+        if (buyer.wallet < courseToBuy.price) {
+            return res.status(400).json({ error: "Insufficient wallet balance" });
+        }
+
+        // Transaction
+        const updatedBuyer = await User.findByIdAndUpdate(
             req.user.userId,
             {
-                $push: {
-                    coursesBuyied: {
-                        videoUrl: courseToBuy.videoUrl,
-                        thumbnailUrl: courseToBuy.thumbnailUrl,
-                        videoTitle: courseToBuy.videoTitle,
-                        videoSubject: courseToBuy.videoSubject,
-                    },
-                },
+                $inc: { wallet: -courseToBuy.price }, // Deduct money
+                $push: { coursesBuyied: courseToBuy } // Add course to buyer
             },
-            { new: true }
-        ).select("coursesBuyied");
+            { new: true } // Return updated user
+        );
 
-        return res.status(200).json({ message: "Course purchased successfully!", updatedUser });
+        await User.findByIdAndUpdate(
+            seller._id,
+            { $inc: { wallet: courseToBuy.price } }, // Add money to seller
+            { new: true }
+        );
+        
+        return res.status(200).json({
+            message: "Course purchased successfully!",
+            updatedUser: updatedBuyer
+        });
     } catch (error) {
         console.error("Error buying course:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
-
 
 
 

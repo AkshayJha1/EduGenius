@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { AuthStore } from "../store/auth.store";
+import { ProfileStore } from "../store/profile.store";
 
 const Navbar = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const { authUser } = AuthStore();
+    const {myProfile } = ProfileStore();
 
     const {logout} = AuthStore();
     const handleLogout = () => {
@@ -25,6 +27,11 @@ const Navbar = () => {
         {authUser ? (
           <>
             <Link to="/profile" className="hover:text-gray-300">Profile</Link>
+            {
+              myProfile && myProfile.role === "Student" ? (
+                <Link to="/uploadVideo" className="hover:text-gray-300">Upload</Link>
+              ) : null
+            }
             <Link onClick={handleLogout} className="hover:text-gray-300">Logout</Link>
           </>
         ) : (
@@ -50,6 +57,11 @@ const Navbar = () => {
           {authUser ? (
             <>
               <Link to="/profile" className="hover:text-gray-300">Profile</Link>
+              {
+                myProfile && myProfile.role === "Student" ? (
+                  <Link to="/uploadVideo" className="hover:text-gray-300">Upload</Link>
+                ) : null
+              }
               <Link onClick={handleLogout} className="hover:text-gray-300">Logout</Link>
             </>
           ) : (

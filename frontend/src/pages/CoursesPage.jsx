@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 const CoursesPage = () => {
   const Navigate = useNavigate(); 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
 
   const { courses, GetCourses} = VideoStore();
   
@@ -15,12 +14,11 @@ const CoursesPage = () => {
 
   const filteredCourses = courses.filter(
     (course) =>
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (selectedCategory === "" || course.category === selectedCategory)
+      course.subject.toLowerCase().includes(searchQuery.toLowerCase()) || course.title.toLowerCase().includes(searchQuery.toLowerCase()) 
   );
 
   const handleEnroll = (url) => {
-    const encodedUrl = encodeURIComponent(url); // ✅ Encode special characters
+    const encodedUrl = encodeURIComponent(url);
     Navigate(`/coursepage/${encodedUrl}`);
   };
   
@@ -35,7 +33,7 @@ const CoursesPage = () => {
       </h1>
 
       {/* Search & Filter */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-end items-center mb-6 gap-4">
         <input
           type="text"
           placeholder="Search for a course..."
@@ -43,18 +41,6 @@ const CoursesPage = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <select
-          className="p-2 rounded-lg bg-gray-800 text-white border border-gray-600"
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          value={selectedCategory}
-        >
-          <option value="">All Categories</option>
-          <option value="JavaScript">JavaScript</option>
-          <option value="React">React</option>
-          <option value="Node.js">Node.js</option>
-          <option value="Full-Stack">Full-Stack</option>
-          <option value="Databases">Databases</option>
-        </select>
       </div>
 
       {/* Courses Grid */}
@@ -63,6 +49,10 @@ const CoursesPage = () => {
           <div
             key={course.id}
             className="bg-[#2C2C2C] p-4 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105"
+            onClick={()=>{
+              const encodedUrl = encodeURIComponent(course.thumbnailUrl);
+               Navigate(`/coursepage/${encodedUrl}`);
+            }}
           >
             <img
               src={course.thumbnailUrl}
@@ -70,12 +60,7 @@ const CoursesPage = () => {
               className="w-full rounded-lg"
             />
             <h3 className="mt-2 font-semibold">{course.title}</h3>
-            <p className="text-gray-400 text-sm mt-1">{course.category}</p>
-            <button onClick={()=>{
-              handleEnroll(course.thumbnailUrl)
-            }} className="mt-4 px-4 py-2 w-full rounded-lg bg-blue-600 hover:bg-blue-700 transition">
-              Enroll Now
-            </button>
+            <p className="text-gray-400 text-sm mt-1">{course.subject}</p>
           </div>
         ))}
       </div>

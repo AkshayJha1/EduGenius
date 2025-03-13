@@ -1,3 +1,7 @@
+1. COURSE ADDING PAGE FOR TEACHERS.
+2. Payment Gateway Integration (Almost only wallet payment left)
+3. offline download features for courses
+
 1. User Authentication & Authorization (Almost)
     JWT-based authentication (or OAuth for Google login).  (Done)
     Role-based access (Students, Teachers, Admins). (Done)
@@ -6,42 +10,21 @@
 
 2. User Management 
     Student profile (Enrolled courses, progress, certifications). (Done)
-    Instructor profile (Courses created, earnings, reviews).
+    Instructor profile (Courses created, earnings, reviews). (done)
     Admin dashboard (Manage users, courses, reports).
 
-3. Course Management 
-    CRUD operations for courses (Create, Read, Update, Delete).
-    Course categories and tags for better organization. (Done)
-    Video content storage (Integration with AWS S3/Cloudinary for large files). (Done)
-    Quiz and assignments module.
-
-4. Enrollment System
-    Free & paid courses. (paid done)
-    Access control (Only enrolled users can view premium content). (Done)
-    Course progress tracking.
 
 5. Payment Gateway Integration
     Stripe/Razorpay integration for course purchases.
-    Wallet system for students (Can be used for micro-transactions).
+    Wallet system for students (Can be used for micro-transactions). (Done)
     Invoice generation.
 
-6. Live Classes & Communication
-    Integration with Zoom/WebRTC for live classes.
-    Real-time chat (socket.io for 1:1 messaging & group discussions).
-    Q&A forum under each course.
 
-7. Gamification & Certificates
-    Badges & leaderboards to increase engagement.
-    Auto-generated certificates for course completion (PDF generator).
 
 8. AI-powered Recommendation System (Optional)
     Personalized course recommendations based on user activity.
     AI-powered quiz evaluation (future scope).
 
-9. Admin Dashboard
-    User & course analytics.
-    Sales reports & revenue tracking.
-    Spam filtering (moderation for reviews & comments).
 
 10. Notifications & Email System
     Real-time notifications for course updates.
