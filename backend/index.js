@@ -25,6 +25,7 @@ const corsOption = {
 
 app.use(cookieParser())
 // app.use("/api/payment/handlingWebhook", express.raw({ type: "application/json" }));
+app.use('/api/payment', paymentRoute);
 app.use(express.json());
 app.use(cors(corsOption));
 
@@ -33,7 +34,6 @@ app.use('/api/auth' , authRoute);
 app.use('/api/profile' , profileRoute);
 app.use('/api/home' , homeRoute);
 app.use('/api/ai', aiRoute);
-app.use('/api/payment', paymentRoute);
 
 
 const fs = require("fs");
