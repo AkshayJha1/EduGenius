@@ -1,5 +1,6 @@
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET; 
+const addBalanceEndpoint = process.env.STRIPE_WEBHOOK_ADD_BALANCE_SECRET;
 
 const User = require('../models/user.model');
 
@@ -155,7 +156,7 @@ const addBalanceWebhook = async (req, res) => {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, addBalanceEndpoint);
   } catch (err) {
     console.error("⚠️ Webhook signature verification failed.", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
