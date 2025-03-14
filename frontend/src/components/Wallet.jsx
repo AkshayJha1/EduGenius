@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ProfileStore } from "../store/profile.store";
 
+
 const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
   const { AddBalance , WithdrawBalance , ProfileData , myProfile} = ProfileStore();
 
@@ -14,8 +15,9 @@ const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
   const handleAddMoney = async () => {
     const balance = parseFloat(amount);
     if (!isNaN(balance) && balance > 0) {
-      await AddBalance(balance);
+      const url = await AddBalance(balance);
       setAmount("");
+      window.location.href = url;
     }
 };
 

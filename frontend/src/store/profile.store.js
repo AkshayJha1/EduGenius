@@ -73,11 +73,7 @@ export const ProfileStore = create((set, get) => ({
     AddBalance : async(amount) => {
         try{
             const response = await axiosInstance.post("/payment/addBalance" , {amount});
-            if(response.status === 200) {
-                toast.success(response.data.message);
-            } else {
-                toast.error("Unable to add funds");
-            }
+            return response.data.url;
         } catch(error) {
             toast.error(error.response?.data?.message || "Error in adding funds");
         }
