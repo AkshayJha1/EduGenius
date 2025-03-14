@@ -93,28 +93,33 @@ const handlingWebhook = async (req, res) => {
 
   let event;
   try {
-      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
-      console.error("⚠️ Webhook signature verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+    console.error("⚠️ Webhook signature verification failed:", err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const thumbnailUrl = session.metadata?.videoUrl;
-      const userId = session.metadata?.userId;
+  console.log("🔍 Webhook Event Received:", event.type);
 
-      if (!thumbnailUrl || !userId) {
-          console.error("❌ Missing thumbnailUrl or userId in metadata");
-          return res.status(400).json({ error: "Missing metadata" });
-      }
+  // Only process course purchases here
+  if (event.type === "checkout.session.completed" && event.data.object.metadata?.videoUrl) {
+    const session = event.data.object;
+    const thumbnailUrl = session.metadata.videoUrl;
+    const userId = session.metadata.userId;
 
-      try {
-          await buyCourseUsingStripe(thumbnailUrl, userId);
-      } catch (error) {
-          console.error("🚨 Error processing purchase:", error);
-          return res.status(500).json({ error: "Failed to process purchase" });
-      }
+    if (!thumbnailUrl || !userId) {
+      console.error("❌ Missing metadata for course purchase");
+      return res.status(400).json({ error: "Missing metadata" });
+    }
+
+    try {
+      await buyCourseUsingStripe(thumbnailUrl, userId);
+    } catch (error) {
+      console.error("🚨 Error processing purchase:", error);
+      return res.status(500).json({ error: "Failed to process purchase" });
+    }
+  } else {
+    console.warn("⚠️ Unhandled event type:", event.type);
   }
 
   res.json({ received: true });
