@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { UploadCloud, Image, Video } from "lucide-react";
 import { VideoStore } from "../store/video.store";
+import toast from "react-hot-toast";
 
 const UploadVideoComponent = () => {
   const [video, setVideo] = useState(null);
@@ -14,8 +15,8 @@ const UploadVideoComponent = () => {
   const { UploadVideo, uploadingVideo } = VideoStore();
 
   const handleUpload = async () => {
-    if (!video || !thumbnail || !title || !subject || !description) {
-      alert("All fields are required!");
+    if (!video || !thumbnail || !title || !subject || !description || !price) {
+      toast.error("All fields are required!");
       return;
     }
 
@@ -30,9 +31,10 @@ const UploadVideoComponent = () => {
     await UploadVideo(formData);
     setVideo(null);
     setThumbnail(null);
-    title("");
-    subject("");
-    description("");
+    setTitle("");
+    setSubject("");
+    setDescription("");
+    setPrice(0);
   };
 
   return (

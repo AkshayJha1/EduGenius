@@ -24,7 +24,7 @@ const corsOption = {
 }
 
 app.use(cookieParser())
-app.use("/api/payment/handlingWebhook", express.raw({ type: "application/json" }));
+// app.use("/api/payment/handlingWebhook", express.raw({ type: "application/json" }));
 app.use(express.json());
 app.use(cors(corsOption));
 

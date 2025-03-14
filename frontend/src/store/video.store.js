@@ -69,7 +69,10 @@ export const VideoStore = create( (set , get) => ({
             const res = await axiosInstance.post('/videos/upload-video' , formData , {
                 headers: {
                   "Content-Type": "multipart/form-data",
-                }});
+            }});
+            if(res.status === 200) toast.success("Video Uploaded successfully");
+            toast.error("Error in uploading video");
+            
         } catch (error) {
             console.error("Error Response:", error.response?.data || error.message);
             toast.error(error.response?.data?.message || "Something went wrong!");
