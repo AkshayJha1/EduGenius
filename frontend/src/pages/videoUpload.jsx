@@ -9,6 +9,7 @@ const UploadVideoComponent = () => {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
+  const [ price , setPrice ] = useState(0)
 
   const { UploadVideo, uploadingVideo } = VideoStore();
 
@@ -24,6 +25,7 @@ const UploadVideoComponent = () => {
     formData.append("title", title);
     formData.append("subject", subject);
     formData.append("description", description);
+    formData.append("price" , price)
 
     await UploadVideo(formData);
     setVideo(null);
@@ -53,6 +55,15 @@ const UploadVideoComponent = () => {
           <input type="file" accept="image/*" className="hidden" onChange={(e) => setThumbnail(e.target.files[0])} />
         </label>
         {thumbnail && <p className="mt-2 text-sm text-gray-300">Selected: {thumbnail.name}</p>}
+
+        {/* Price Input */}
+        <input
+          type="number"
+          placeholder="price"
+          className="w-full p-2 mt-4 bg-[#3A3A3A] text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
 
         {/* Title Input */}
         <input

@@ -18,7 +18,7 @@ const aiRoute = require('./src/routes/ai.route');
 const paymentRoute = require('./src/routes/payment.route');
 
 const corsOption = {
-  origin : process.env.NODE_ENV === 'development' ? "http://localhost:5173" : "https://edugenius.onrender.com",
+  origin : process.env.NODE_ENV === 'development' ? "http://localhost:5173" : process.env.FRONTEND_URL,
   methods : "GET ,  POST , PUT , DELETE , PUT , PATCH ,  HEAD",
   Credential : true,
 }
