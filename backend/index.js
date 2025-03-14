@@ -36,16 +36,26 @@ app.use('/api/ai', aiRoute);
 app.use('/api/payment', paymentRoute);
 
 
-if(process.env.NODE_ENV === "production"){
-    app.use(express.static(path.join(__dirname,"../frontend/dist")));
+const fs = require("fs");
 
+if (process.env.NODE_ENV === "production") {
+    const buildPath = path.join(__dirname, "../frontend/dist/index.html");
+    
+    if (!fs.existsSync(buildPath)) {
+        console.error("🚨 Frontend build is missing! Run 'npm run build' inside the frontend folder.");
+    } else {
+        console.log("✅ Frontend build detected.");
+    }
 
-    app.get("*", (req,res) => {
-        if(!req.path.startsWith("/api")){
-            res.sendFile(path.join(__dirname, "../frontend", "dist" , "index.html"));
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("*", (req, res) => {
+        if (!req.path.startsWith("/api")) {
+            res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
         }
-    })
-} 
+    });
+}
+
 
 server.listen(PORT,()=>{
     console.log(`Sever is running on the port number ${PORT}`);
