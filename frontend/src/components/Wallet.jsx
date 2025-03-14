@@ -23,7 +23,7 @@ const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
     const balance = parseFloat(amount);
     if (!isNaN(balance) && balance > 0 && balance <= balance) {
 
-      await WithdrawBalance({balance});
+      await WithdrawBalance(balance);
       setAmount("");
     }
   };

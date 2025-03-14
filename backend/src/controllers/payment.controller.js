@@ -98,8 +98,6 @@ const handlingWebhook = async (req, res) => {
       return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  console.log("🔍 Full Webhook Payload:", JSON.stringify(event, null, 2));
-
   if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const thumbnailUrl = session.metadata?.videoUrl;
@@ -112,7 +110,6 @@ const handlingWebhook = async (req, res) => {
 
       try {
           await buyCourseUsingStripe(thumbnailUrl, userId);
-          console.log("✅ Course purchased successfully!");
       } catch (error) {
           console.error("🚨 Error processing purchase:", error);
           return res.status(500).json({ error: "Failed to process purchase" });
