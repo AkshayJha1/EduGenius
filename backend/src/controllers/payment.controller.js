@@ -165,7 +165,7 @@ const addBalanceWebhook = async (req, res) => {
   if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const userId = session.metadata.userId; 
-      const amount = session.metadata.amount;
+      const amount = parseFloat(session.metadata.amount);
 
       if (!userId) {
           console.error("❌ Missing UserId in metadata");

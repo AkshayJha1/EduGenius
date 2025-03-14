@@ -9,24 +9,24 @@ const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
     ProfileData();
   },[myProfile])
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
 
   const handleAddMoney = async () => {
     const balance = parseFloat(amount);
     if (!isNaN(balance) && balance > 0) {
-      await AddBalance({balance});
-      setAmount(0);
+      await AddBalance(balance);
+      setAmount("");
     }
-  };
+};
 
-  const handleWithdrawMoney = async() => {
+const handleWithdrawMoney = async () => {
     const balance = parseFloat(amount);
-    if (!isNaN(balance) && balance > 0 && balance <= balance) {
-
+    if (!isNaN(balance) && balance > 0 && balance <= myProfile.wallet) {
       await WithdrawBalance(balance);
-      setAmount(0);
+      setAmount("");
     }
-  };
+};
+
 
   return (
     <motion.div 

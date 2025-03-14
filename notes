@@ -1,6 +1,4 @@
-1. COURSE ADDING PAGE FOR TEACHERS.
 2. Payment Gateway Integration (Almost only wallet payment left)
-3. offline download features for courses
 
 1. User Authentication & Authorization (Almost)
     JWT-based authentication (or OAuth for Google login).  (Done)
