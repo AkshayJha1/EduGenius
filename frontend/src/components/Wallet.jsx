@@ -9,13 +9,13 @@ const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
     ProfileData();
   },[myProfile])
 
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(0);
 
   const handleAddMoney = async () => {
     const balance = parseFloat(amount);
     if (!isNaN(balance) && balance > 0) {
       await AddBalance({balance});
-      setAmount("");
+      setAmount(0);
     }
   };
 
@@ -24,7 +24,7 @@ const WalletCard = ({ onClose , money }) => {  // Accept onClose prop
     if (!isNaN(balance) && balance > 0 && balance <= balance) {
 
       await WithdrawBalance(balance);
-      setAmount("");
+      setAmount(0);
     }
   };
 
